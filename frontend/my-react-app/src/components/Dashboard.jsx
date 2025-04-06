@@ -1,7 +1,8 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
-import { FaChartPie, FaChartBar, FaMoneyBillWave, FaShoppingBag, FaHome } from 'react-icons/fa';
+import { FaChartPie, FaChartBar, FaMoneyBillWave, FaShoppingBag, FaHome, FaExclamationTriangle, FaLightbulb } from 'react-icons/fa';
+import { getBudgetCategory, getMainCategory } from '../utils/categoryMapping';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
@@ -45,10 +46,10 @@ const Dashboard = ({ transactions }) => {
     ],
   };
 
-  // Group transactions by category
+  // Group transactions by category using our consistent mapping
   const categoryTotals = {};
   transactions.forEach(t => {
-    const mainCategory = t.category.split(' > ')[0];
+    const mainCategory = getMainCategory(t.category);
     if (!categoryTotals[mainCategory]) {
       categoryTotals[mainCategory] = 0;
     }
@@ -80,6 +81,86 @@ const Dashboard = ({ transactions }) => {
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
 
+  // Generate spending insights
+  const generateInsights = () => {
+    const insights = [];
+    
+    // Get current month transactions
+    const now = new Date();
+    const currentMonthTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    });
+    
+    // Check if wants spending is high
+    if (parseFloat(wantsPercentage) > 35) {
+      insights.push({
+        type: 'warning',
+        icon: <FaExclamationTriangle />,
+        title: 'High discretionary spending',
+        message: `Your wants currently account for ${wantsPercentage}% of your spending, which is higher than the recommended 30%. Consider reviewing your non-essential expenses.`
+      });
+    }
+    
+    // Check for frequent small purchases
+    const smallPurchases = currentMonthTransactions.filter(t => 
+      t.classification === 'want' && Math.abs(t.amount) < 20
+    );
+    
+    if (smallPurchases.length > 5) {
+      const smallTotal = smallPurchases.reduce((sum, t) => sum + Math.abs(t.amount), 0).toFixed(2);
+      insights.push({
+        type: 'info',
+        icon: <FaLightbulb />,
+        title: 'Small purchases add up',
+        message: `You've made ${smallPurchases.length} small purchases under $20 this month, totaling $${smallTotal}. These small expenses can add up quickly.`
+      });
+    }
+    
+    // Check for category-specific insights
+    const foodSpending = categoryTotals['Food and Drink'] || 0;
+    if (foodSpending > totalSpending * 0.25) {
+      insights.push({
+        type: 'warning',
+        icon: <FaExclamationTriangle />,
+        title: 'High food spending',
+        message: `Your food and drink expenses represent ${(foodSpending / totalSpending * 100).toFixed(0)}% of your total spending. Consider meal planning or reducing dining out.`
+      });
+    }
+    
+    // Check day-of-week spending patterns
+    const weekendTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return date.getDay() === 0 || date.getDay() === 6; // 0 = Sunday, 6 = Saturday
+    });
+    
+    const weekendSpending = weekendTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const weekendPercentage = (weekendSpending / totalSpending * 100).toFixed(0);
+    
+    if (weekendPercentage > 40) {
+      insights.push({
+        type: 'info',
+        icon: <FaLightbulb />,
+        title: 'Weekend spending habits',
+        message: `You spend ${weekendPercentage}% of your money on weekends. Setting a weekend budget could help you manage your finances better.`
+      });
+    }
+    
+    // Default insight if none generated
+    if (insights.length === 0) {
+      insights.push({
+        type: 'success',
+        icon: <FaLightbulb />,
+        title: 'Your spending looks balanced',
+        message: 'Keep up the good work! Your spending pattern follows healthy financial habits.'
+      });
+    }
+    
+    return insights;
+  };
+
+  const insights = generateInsights();
+
   return (
     <>
       <h1>Spending Dashboard</h1>
@@ -100,6 +181,44 @@ const Dashboard = ({ transactions }) => {
           <FaShoppingBag className="summary-card-icon" style={{ color: '#ff9800' }} />
           <div className="summary-card-value">${wantsTotal.toFixed(2)}</div>
           <div className="summary-card-label">Wants ({wantsPercentage}%)</div>
+        </div>
+      </div>
+
+      {/* Spending Insights */}
+      <div className="card" style={{ marginTop: '2rem' }}>
+        <h2 className="card-title">
+          <FaLightbulb className="card-icon" /> Smart Spending Insights
+        </h2>
+        <div className="insights-container">
+          {insights.map((insight, index) => (
+            <div 
+              key={index} 
+              className={`insight-item insight-${insight.type}`}
+              style={{
+                padding: '1rem',
+                margin: '0.5rem 0',
+                borderRadius: '4px',
+                backgroundColor: insight.type === 'warning' ? '#fff3e0' : 
+                                insight.type === 'info' ? '#e3f2fd' : '#e8f5e9',
+                borderLeft: `4px solid ${insight.type === 'warning' ? '#ff9800' : 
+                              insight.type === 'info' ? '#2196f3' : '#4caf50'}`
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                <div style={{ 
+                  color: insight.type === 'warning' ? '#ff9800' : 
+                         insight.type === 'info' ? '#2196f3' : '#4caf50',
+                  marginTop: '0.25rem'
+                }}>
+                  {insight.icon}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>{insight.title}</div>
+                  <div>{insight.message}</div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

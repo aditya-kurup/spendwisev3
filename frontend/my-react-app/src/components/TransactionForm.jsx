@@ -10,23 +10,45 @@ const TransactionForm = ({ addTransaction, setError, setIsLoading }) => {
     category: ''
   });
 
+  // Updated categories to match model categories
   const categories = [
+    // Need categories
     'Food and Drink > Groceries',
-    'Food and Drink > Restaurants',
-    'Food and Drink > Coffee Shop',
     'Housing > Rent',
     'Housing > Mortgage',
     'Housing > Utilities',
-    'Transportation > Gas',
-    'Transportation > Public Transit',
-    'Shopping > Clothing',
-    'Shopping > Electronics',
+    'Transfer > Deposit',
+    'Payment > Credit Card',
+    'Payment > Loan',
+    'Travel > Public Transportation',
     'Healthcare > Medical',
     'Healthcare > Pharmacy',
-    'Entertainment',
-    'Travel',
-    'Personal Care',
-    'Education',
+    'Healthcare > Insurance',
+    'Service > Utilities',
+    'Service > Phone',
+    'Service > Internet',
+    'Service > Subscription',
+    'Education > Tuition',
+    'Education > Books',
+    
+    // Want categories
+    'Food and Drink > Restaurants',
+    'Food and Drink > Coffee Shop',
+    'Food and Drink > Alcohol & Bars',
+    'Shopping > Clothing',
+    'Shopping > Electronics',
+    'Shopping > Home',
+    'Shopping > Gifts',
+    'Travel > Vacation',
+    'Travel > Rideshare',
+    'Travel > Hotel',
+    'Travel > Air Travel',
+    'Recreation > Gym',
+    'Recreation > Entertainment',
+    'Recreation > Sports',
+    'Recreation > Hobbies',
+    'Personal Care > Spa',
+    'Personal Care > Beauty',
     'Other'
   ];
 
@@ -52,15 +74,28 @@ const TransactionForm = ({ addTransaction, setError, setIsLoading }) => {
     
     try {
       // Call API to classify transaction
-      const response = await axios.post('http://localhost:5000/api/predict', formData);
+      const response = await axios.post('http://localhost:5000/api/predict', [formData]);
       
+      // Ensure all data is properly formatted before saving
       const classifiedTransaction = {
         ...formData,
-        classification: response.data.classification,
-        confidence: response.data.confidence
+        // Convert amount to a number to ensure consistent format
+        amount: parseFloat(formData.amount),
+        // Ensure date is in ISO format
+        date: new Date(formData.date).toISOString(),
+        // Add classification data from the first result (since we sent an array with one item)
+        classification: response.data[0]?.classification || 'uncategorized',
+        confidence: response.data[0]?.confidence || 50
       };
       
-      // Add to transaction list
+      // Get existing transactions directly from localStorage for maximum reliability
+      const existingTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      const updatedTransactions = [...existingTransactions, classifiedTransaction];
+      
+      // Save directly to localStorage
+      localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+      
+      // Add to transaction list through the parent component
       addTransaction(classifiedTransaction);
       
       // Reset form

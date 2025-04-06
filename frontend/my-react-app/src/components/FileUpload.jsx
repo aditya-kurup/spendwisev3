@@ -73,12 +73,17 @@ const FileUpload = ({ setTransactions, setError, setIsLoading }) => {
             const transaction = {
               name: values[nameIndex].trim().replace(/"/g, ''),
               amount: parseFloat(values[amountIndex].replace(/[^\d.-]/g, '')),
-              date: values[dateIndex].trim(),
+              date: new Date(values[dateIndex].trim()).toISOString(),
               category: categoryIndex !== -1 ? values[categoryIndex].trim() : 'Uncategorized'
             };
             
             // Skip invalid entries
             if (!transaction.name || isNaN(transaction.amount)) continue;
+            
+            // Ensure date is valid
+            if (isNaN(new Date(transaction.date).getTime())) {
+              transaction.date = new Date().toISOString();
+            }
             
             transactions.push(transaction);
           }
@@ -90,11 +95,47 @@ const FileUpload = ({ setTransactions, setError, setIsLoading }) => {
             // Update transactions with classification results
             const classifiedTransactions = response.data.map(result => ({
               ...result.transaction,
-              classification: result.classification,
-              confidence: result.confidence
+              classification: result.classification || 'uncategorized',
+              confidence: result.confidence || 50
             }));
             
-            setTransactions(classifiedTransactions);
+            // Get existing transactions from localStorage directly to ensure most recent state
+            const existingTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            const updatedTransactions = [...existingTransactions, ...classifiedTransactions];
+            
+            // Update transactions one by one to trigger notifications for each
+            const newTransactionsOnly = classifiedTransactions.filter(newTx => 
+              !existingTransactions.some(existingTx => 
+                existingTx.name === newTx.name && 
+                existingTx.amount === newTx.amount && 
+                existingTx.date === newTx.date
+              )
+            );
+
+            // First update with all transactions for persistence
+            setTransactions(updatedTransactions);
+
+            // Then trigger notifications one by one with a delay
+            if (newTransactionsOnly.length > 0) {
+              // For sample data or very large imports, limit notifications to 3
+              const notificationsToShow = newTransactionsOnly.length > 5 ? 3 : newTransactionsOnly.length;
+              
+              for (let i = 0; i < notificationsToShow; i++) {
+                setTimeout(() => {
+                  // Simulate adding each transaction individually to trigger notification
+                  setTransactions(current => {
+                    // This won't change the actual state since we're returning the same array
+                    // But it will pass the transaction to the SpendingNotifications component
+                    newTransactionsOnly[i].isNew = true;
+                    return [...current];
+                  });
+                }, i * 1500); // Stagger notifications
+              }
+            }
+
+            // Also update localStorage directly as a backup mechanism
+            localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+            
             setSuccessMessage(`Successfully imported ${classifiedTransactions.length} transactions`);
             setFile(null);
             if (fileInputRef.current) {
@@ -139,11 +180,22 @@ const FileUpload = ({ setTransactions, setError, setIsLoading }) => {
       // Update transactions with classification results
       const classifiedTransactions = classificationResponse.data.map(result => ({
         ...result.transaction,
-        classification: result.classification,
-        confidence: result.confidence
+        classification: result.classification || 'uncategorized',
+        confidence: result.confidence || 50,
+        // Ensure date is in ISO format
+        date: new Date(result.transaction.date).toISOString()
       }));
       
-      setTransactions(classifiedTransactions);
+      // Get existing transactions directly from localStorage
+      const existingTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      const updatedTransactions = [...existingTransactions, ...classifiedTransactions];
+      
+      // Update transactions in parent component
+      setTransactions(updatedTransactions);
+      
+      // Also update localStorage directly as a backup
+      localStorage.setItem('transactions', JSON.stringify(updatedTransactions));
+      
       setSuccessMessage(`Successfully loaded ${classifiedTransactions.length} sample transactions`);
       
     } catch (error) {

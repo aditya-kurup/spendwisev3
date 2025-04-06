@@ -18,6 +18,23 @@ const TransactionList = ({ transactions, removeTransaction }) => {
     new Date(b.date) - new Date(a.date)
   );
 
+  const handleRemoveTransaction = (index) => {
+    // Call the removeTransaction function from parent
+    removeTransaction(index);
+    
+    // Also update localStorage directly as a backup
+    try {
+      const currentTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      if (Array.isArray(currentTransactions) && index < currentTransactions.length) {
+        currentTransactions.splice(index, 1);
+        localStorage.setItem('transactions', JSON.stringify(currentTransactions));
+        console.log('Transaction removed and localStorage updated');
+      }
+    } catch (err) {
+      console.error('Error directly updating localStorage on remove:', err);
+    }
+  };
+
   return (
     <div className="card">
       <h2 className="card-title">
@@ -40,7 +57,7 @@ const TransactionList = ({ transactions, removeTransaction }) => {
               ${Math.abs(transaction.amount).toFixed(2)}
             </div>
             <button 
-              onClick={() => removeTransaction(index)}
+              onClick={() => handleRemoveTransaction(index)}
               style={{ backgroundColor: 'transparent', color: '#f44336' }}
             >
               <FaRegTrashAlt />
