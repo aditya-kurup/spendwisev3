@@ -3,11 +3,11 @@ import { FaWallet } from 'react-icons/fa';
 
 const Header = () => {
   return (
-    <header>
+    <header style={{ textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
       <div className="header-content">
         <div className="logo">
           <FaWallet className="logo-icon" />
-          <span>Smart Spending Analyzer</span>
+          <span>SpendWise</span>
         </div>
       </div>
     </header>

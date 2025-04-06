@@ -3,11 +3,12 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import { Pie, Bar } from 'react-chartjs-2';
 import { FaChartPie, FaChartBar, FaMoneyBillWave, FaShoppingBag, FaHome, FaExclamationTriangle, FaLightbulb } from 'react-icons/fa';
 import { getBudgetCategory, getMainCategory } from '../utils/categoryMapping';
+import SpendingNotifications from './SpendingNotifications';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
-const Dashboard = ({ transactions }) => {
+const Dashboard = ({ transactions, newTransaction }) => {
   // If no transactions, show a message
   if (!transactions || transactions.length === 0) {
     return (
@@ -213,8 +214,8 @@ const Dashboard = ({ transactions }) => {
                   {insight.icon}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>{insight.title}</div>
-                  <div>{insight.message}</div>
+                  <div style={{ fontWeight: 'bold', marginBottom: '0.25rem', color: '#000000' }}>{insight.title}</div>
+                  <div style={{ color: '#000000' }}>{insight.message}</div>
                 </div>
               </div>
             </div>
@@ -255,6 +256,8 @@ const Dashboard = ({ transactions }) => {
           </div>
         </div>
       </div>
+
+ 
 
       {/* Financial Health Tips */}
       <div className="card" style={{ marginTop: '2rem' }}>
