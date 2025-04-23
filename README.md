@@ -1,8 +1,8 @@
-# SpendWise v3
+# SpendWise 
 
 ## Smart Finance Management with AI-Powered Insights
 
-SpendWise v3 is an intelligent personal finance management application that uses machine learning to help users make smarter financial decisions. The application automatically categorizes transactions and provides personalized insights based on spending patterns.
+SpendWise is an intelligent personal finance management application that uses machine learning to help users make smarter financial decisions. The application automatically categorizes transactions and provides personalized insights based on spending patterns.
 
 ## Key Features
 
@@ -27,7 +27,7 @@ SpendWise v3 is an intelligent personal finance management application that uses
 
 ## AI Model Details
 
-The core of SpendWise v3 is our sophisticated machine learning model that:
+The core of SpendWise is our sophisticated machine learning model that:
 
 1. **Categorizes Transactions**: Uses a Random Forest classifier trained on thousands of financial transactions to automatically assign categories (groceries, entertainment, utilities, etc.)
 
