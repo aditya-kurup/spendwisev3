@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaExclamationTriangle, FaLightbulb, FaCheckCircle, FaTimesCircle, FaTrashAlt } from 'react-icons/fa';
+import { FaExclamationTriangle, FaLightbulb, FaCheckCircle, FaTimesCircle, FaTrashAlt, FaInfoCircle } from 'react-icons/fa';
 
 const SpendingNotifications = ({ transactions, newTransaction }) => {
   const [notifications, setNotifications] = useState([]);
@@ -72,48 +72,96 @@ const SpendingNotifications = ({ transactions, newTransaction }) => {
   // If no notifications, display a placeholder message
   if (notifications.length === 0) {
     return (
-      <div className="nudge-container-empty">
-        <p>No spending insights yet. Add transactions to receive personalized financial nudges.</p>
+      <div className="p-4 text-center">
+        <FaInfoCircle style={{ fontSize: '2rem', opacity: '0.5' }} className="mb-3" />
+        <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontWeight: '500' }}>
+          No spending insights yet. Add transactions to receive personalized financial nudges.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="nudge-container">
-      <div className="nudge-header">
-        <h3>Recent Spending Insights</h3>
+    <div className="p-3">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h6 className="mb-0 fw-bold text-primary" style={{ textShadow: '0 1px 1px rgba(0,0,0,0.2)' }}>
+          Recent Spending Insights
+        </h6>
         {notifications.length > 0 && (
           <button 
-            className="clear-all-btn" 
+            className="btn btn-sm btn-outline-secondary" 
             onClick={clearAllNotifications}
             title="Clear all notifications"
+            style={{ color: 'rgba(255, 255, 255, 0.9)', borderColor: 'rgba(255, 255, 255, 0.3)' }}
           >
-            <FaTrashAlt /> Clear All
+            <FaTrashAlt size={12} className="me-1" /> Clear All
           </button>
         )}
       </div>
       
-      <div className="nudge-list">
-        {notifications.map((notification, index) => (
-          <div key={index} className={`nudge-item nudge-${notification.type}`}>
-            <div className="nudge-icon">{notification.icon}</div>
-            <div className="nudge-content">
-              <div className="nudge-title-row">
-                <h4 style={{ color: '#000000' }}>{notification.title}</h4>
-                <span className="nudge-timestamp">{notification.timestamp}</span>
-              </div>
-              <p style={{ color: '#000000' }}>{notification.message}</p>
-            </div>
-            <button
-              className="nudge-dismiss"
-              onClick={() => removeNotification(index)}
-              aria-label="Dismiss notification"
-              title="Dismiss this notification"
+      <div className="notification-list">
+        {notifications.map((notification, index) => {
+          let alertClass = "alert-primary";
+          let icon = <FaInfoCircle />;
+          let iconColor = "#64b5f6"; // Brighter blue for info
+          let bgColor = "rgba(33, 150, 243, 0.2)"; // Darker background for contrast
+          let textColor = "#e3f2fd"; // Bright text for dark background
+          
+          if (notification.type === 'warning') {
+            alertClass = "alert-warning";
+            icon = <FaExclamationTriangle />;
+            iconColor = "#ffb74d"; // Brighter orange for warning
+            bgColor = "rgba(255, 152, 0, 0.2)"; // Darker background
+            textColor = "#fff3e0"; // Bright text
+          } else if (notification.type === 'success') {
+            alertClass = "alert-success";
+            icon = <FaCheckCircle />;
+            iconColor = "#81c784"; // Brighter green for success
+            bgColor = "rgba(76, 175, 80, 0.2)"; // Darker background
+            textColor = "#e8f5e9"; // Bright text
+          } else if (notification.type === 'info') {
+            alertClass = "alert-info";
+            icon = <FaLightbulb />;
+            bgColor = "rgba(33, 150, 243, 0.2)"; // Darker background
+          }
+          
+          return (
+            <div 
+              key={index} 
+              className={`alert ${alertClass} d-flex align-items-start mb-3`}
+              role="alert"
+              style={{ 
+                backgroundColor: bgColor,
+                borderLeft: `3px solid ${iconColor}`,
+                color: textColor
+              }}
             >
-              <FaTimesCircle />
-            </button>
-          </div>
-        ))}
+              <div className="me-3 mt-1" style={{ color: iconColor }}>
+                {icon}
+              </div>
+              <div className="flex-grow-1">
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <h6 className="mb-0 fw-bold" style={{ color: textColor }}>
+                    {notification.title}
+                  </h6>
+                  <small style={{ color: `${textColor}99` }}>
+                    {notification.timestamp}
+                  </small>
+                </div>
+                <p className="mb-0 small" style={{ color: textColor }}>
+                  {notification.message}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="btn-close ms-2"
+                onClick={() => removeNotification(index)}
+                aria-label="Dismiss notification"
+                style={{ filter: 'brightness(2)' }} /* Make close button more visible */
+              ></button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

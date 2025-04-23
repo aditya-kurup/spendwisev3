@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaMoneyBillWave, FaCalendarAlt, FaTags, FaFileInvoiceDollar } from 'react-icons/fa';
+import { ALL_CATEGORIES } from '../utils/categoryMapping';
 
 const TransactionForm = ({ addTransaction, setError, setIsLoading }) => {
   const [formData, setFormData] = useState({
@@ -9,48 +10,6 @@ const TransactionForm = ({ addTransaction, setError, setIsLoading }) => {
     date: new Date().toISOString().split('T')[0],
     category: ''
   });
-
-  // Updated categories to match model categories
-  const categories = [
-    // Need categories
-    'Food and Drink > Groceries',
-    'Housing > Rent',
-    'Housing > Mortgage',
-    'Housing > Utilities',
-    'Transfer > Deposit',
-    'Payment > Credit Card',
-    'Payment > Loan',
-    'Travel > Public Transportation',
-    'Healthcare > Medical',
-    'Healthcare > Pharmacy',
-    'Healthcare > Insurance',
-    'Service > Utilities',
-    'Service > Phone',
-    'Service > Internet',
-    'Service > Subscription',
-    'Education > Tuition',
-    'Education > Books',
-    
-    // Want categories
-    'Food and Drink > Restaurants',
-    'Food and Drink > Coffee Shop',
-    'Food and Drink > Alcohol & Bars',
-    'Shopping > Clothing',
-    'Shopping > Electronics',
-    'Shopping > Home',
-    'Shopping > Gifts',
-    'Travel > Vacation',
-    'Travel > Rideshare',
-    'Travel > Hotel',
-    'Travel > Air Travel',
-    'Recreation > Gym',
-    'Recreation > Entertainment',
-    'Recreation > Sports',
-    'Recreation > Hobbies',
-    'Personal Care > Spa',
-    'Personal Care > Beauty',
-    'Other'
-  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,66 +73,88 @@ const TransactionForm = ({ addTransaction, setError, setIsLoading }) => {
   };
 
   return (
-    <div className="card transaction-form">
-      <h2 className="card-title">
-        <FaPlus className="card-icon" /> Add New Transaction
-      </h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="name">Transaction Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="e.g., Grocery Store, Restaurant, etc."
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="amount">Amount ($)</label>
-          <input
-            type="number"
-            id="amount"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            placeholder="Enter amount"
-            step="0.01"
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="date">Date</label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-          />
-        </div>
-        
-        <div className="form-group">
-          <label htmlFor="category">Category</label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-          >
-            <option value="">Select a category</option>
-            {categories.map((category, index) => (
-              <option key={index} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <button type="submit">Add Transaction</button>
-      </form>
+    <div className="card mb-4">
+      <div className="card-header bg-primary bg-gradient text-white">
+        <h5 className="card-title mb-0">
+          <FaPlus className="me-2" /> Add New Transaction
+        </h5>
+      </div>
+      <div className="card-body">
+        <form onSubmit={handleSubmit}>
+          <div className="row g-3">
+            <div className="col-md-6">
+              <label htmlFor="name" className="form-label">
+                <FaFileInvoiceDollar className="me-2" /> Transaction Name
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g., Grocery Store, Restaurant, etc."
+              />
+            </div>
+            
+            <div className="col-md-6">
+              <label htmlFor="amount" className="form-label">
+                <FaMoneyBillWave className="me-2" /> Amount ($)
+              </label>
+              <input
+                type="number"
+                className="form-control"
+                id="amount"
+                name="amount"
+                value={formData.amount}
+                onChange={handleChange}
+                placeholder="Enter amount"
+                step="0.01"
+              />
+            </div>
+            
+            <div className="col-md-6">
+              <label htmlFor="date" className="form-label">
+                <FaCalendarAlt className="me-2" /> Date
+              </label>
+              <input
+                type="date"
+                className="form-control"
+                id="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+              />
+            </div>
+            
+            <div className="col-md-6">
+              <label htmlFor="category" className="form-label">
+                <FaTags className="me-2" /> Category
+              </label>
+              <select
+                className="form-select"
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+              >
+                <option value="">Select a category</option>
+                {ALL_CATEGORIES.map((category, index) => (
+                  <option key={index} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="col-12 text-end mt-4">
+              <button type="submit" className="btn btn-primary">
+                <FaPlus className="me-2" /> Add Transaction
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

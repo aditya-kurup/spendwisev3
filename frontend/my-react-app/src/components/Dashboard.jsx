@@ -214,8 +214,16 @@ const Dashboard = ({ transactions, newTransaction }) => {
                   {insight.icon}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 'bold', marginBottom: '0.25rem', color: '#000000' }}>{insight.title}</div>
-                  <div style={{ color: '#000000' }}>{insight.message}</div>
+                  <div style={{ 
+                    fontWeight: 'bold', 
+                    marginBottom: '0.25rem', 
+                    color: '#333333'  /* Darker for better contrast on light backgrounds */
+                  }}>
+                    {insight.title}
+                  </div>
+                  <div style={{ color: '#444444' /* Slightly lighter but still readable */}}>
+                    {insight.message}
+                  </div>
                 </div>
               </div>
             </div>

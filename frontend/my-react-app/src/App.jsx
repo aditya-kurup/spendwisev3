@@ -6,7 +6,7 @@ import Dashboard from './components/Dashboard';
 import Budget from './components/Budget';
 import FileUpload from './components/FileUpload';
 import SpendingNotifications from './components/SpendingNotifications';
-import { FaChartPie, FaList, FaUpload, FaCoins } from 'react-icons/fa';
+import { FaChartPie, FaList, FaUpload, FaCoins, FaBell } from 'react-icons/fa';
 
 function App() {
   const [transactions, setTransactions] = useState([]);
@@ -14,6 +14,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [newTransaction, setNewTransaction] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Load transactions from localStorage when component mounts
   useEffect(() => {
@@ -61,6 +62,10 @@ function App() {
     updateTransactions(updatedTransactions);
   };
 
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -84,25 +89,81 @@ function App() {
   return (
     <>
       <Header />
-      <div className="main-layout">
-        <div className="tabs">
-          <div className={`tab ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-            <FaChartPie style={{ marginRight: '0.5rem' }} /> Dashboard
-          </div>
-          <div className={`tab ${activeTab === 'budget' ? 'active' : ''}`} onClick={() => setActiveTab('budget')}>
-            <FaCoins style={{ marginRight: '0.5rem' }} /> Budget
-          </div>
-          <div className={`tab ${activeTab === 'transactions' ? 'active' : ''}`} onClick={() => setActiveTab('transactions')}>
-            <FaList style={{ marginRight: '0.5rem' }} /> Transactions
-          </div>
-          <div className={`tab ${activeTab === 'upload' ? 'active' : ''}`} onClick={() => setActiveTab('upload')}>
-            <FaUpload style={{ marginRight: '0.5rem' }} /> Upload CSV
-          </div>
-        </div>
+      <div className="container">
+        <div className="row">
+          <div className="col-md-9">
+            {/* Modern Bootstrap Tabs */}
+            <ul className="nav nav-tabs">
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`} 
+                  onClick={() => setActiveTab('dashboard')}
+                  href="#"
+                >
+                  <FaChartPie className="me-2" /> Dashboard
+                </a>
+              </li>
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'budget' ? 'active' : ''}`} 
+                  onClick={() => setActiveTab('budget')}
+                  href="#"
+                >
+                  <FaCoins className="me-2" /> Budget
+                </a>
+              </li>
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'transactions' ? 'active' : ''}`} 
+                  onClick={() => setActiveTab('transactions')}
+                  href="#"
+                >
+                  <FaList className="me-2" /> Transactions
+                </a>
+              </li>
+              <li className="nav-item">
+                <a 
+                  className={`nav-link ${activeTab === 'upload' ? 'active' : ''}`} 
+                  onClick={() => setActiveTab('upload')}
+                  href="#"
+                >
+                  <FaUpload className="me-2" /> Upload CSV
+                </a>
+              </li>
+            </ul>
 
-        <div className="content-area">
-          {error && <div className="error-message">{error}</div>}
-          {isLoading ? <div className="loading-spinner"><div></div></div> : renderTabContent()}
+            {error && (
+              <div className="alert alert-danger mt-3">
+                <i className="fas fa-exclamation-circle me-2"></i> {error}
+              </div>
+            )}
+            
+            {isLoading ? (
+              <div className="text-center my-5 loading-spinner">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : (
+              renderTabContent()
+            )}
+          </div>
+          
+          <div className="col-md-3 mt-3 mt-md-0">
+            <div className="card">
+              <div className="card-header d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">
+                  <FaBell className="me-2" /> Insights
+                </h5>
+              </div>
+              <div className="card-body p-0">
+                <SpendingNotifications 
+                  transactions={transactions} 
+                  newTransaction={newTransaction} 
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

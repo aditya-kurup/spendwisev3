@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaCoins, FaChartLine, FaEdit, FaSave, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
-import { Pie } from 'react-chartjs-2';
+import { FaCoins, FaChartLine, FaEdit, FaSave, FaTimes, FaExclamationTriangle, FaFileAlt } from 'react-icons/fa';
+import { Pie, Bar } from 'react-chartjs-2';
 
 const Budget = ({ transactions }) => {
-  // Default budget categories with related terms for flexible matching
   const defaultBudgets = {
     'Food and Drink': { 
       limit: 500, 
@@ -67,41 +66,34 @@ const Budget = ({ transactions }) => {
     }
   };
 
-  // Budget state
   const [budgets, setBudgets] = useState(() => {
     const savedBudgets = localStorage.getItem('budgets');
     return savedBudgets ? JSON.parse(savedBudgets) : defaultBudgets;
   });
   
-  // Editing state
   const [isEditing, setIsEditing] = useState(false);
   const [editedBudgets, setEditedBudgets] = useState({});
-  
-  // Calculate current month's spending by category
   const [categorySpending, setCategorySpending] = useState({});
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const [warnings, setWarnings] = useState([]);
+  const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  const [monthsWithData, setMonthsWithData] = useState([]);
+  const [hasMultipleMonths, setHasMultipleMonths] = useState(false);
+  const [monthlyComparisonData, setMonthlyComparisonData] = useState({});
 
-  // Save budgets to localStorage when they change
   useEffect(() => {
     localStorage.setItem('budgets', JSON.stringify(budgets));
   }, [budgets]);
 
-  // Function to categorize a transaction into our budget categories
   const categorizeToBudgetCategory = (transaction) => {
     const transactionCategoryLower = transaction.category.toLowerCase();
     const transactionNameLower = transaction.name.toLowerCase();
-
-    // First try to match by direct comparison of main category
     const mainCategory = transaction.category.split(' > ')[0];
     if (budgets[mainCategory]) {
       return mainCategory;
     }
-
-    // If no direct match, check if any category terms match
     for (const [budgetCategory, details] of Object.entries(budgets)) {
-      // Check if any of the category terms match either the transaction category or name
       if (details.terms && details.terms.some(term => 
         transactionCategoryLower.includes(term.toLowerCase()) || 
         transactionNameLower.includes(term.toLowerCase())
@@ -109,33 +101,25 @@ const Budget = ({ transactions }) => {
         return budgetCategory;
       }
     }
-
-    // Default to 'Other' if no matches found
     return 'Other';
   };
 
-  // When transactions or month/year changes, recalculate spending
   useEffect(() => {
     if (!transactions || transactions.length === 0) {
       setCategorySpending({});
       return;
     }
 
-    // Filter transactions for the selected month/year
     const filteredTransactions = transactions.filter(transaction => {
       const date = new Date(transaction.date);
       return date.getMonth() === month && date.getFullYear() === year;
     });
 
-    // Sum spending by budget category using the improved categorization function
     const spending = {};
-    
-    // Initialize all budget categories with zero
     Object.keys(budgets).forEach(category => {
       spending[category] = 0;
     });
 
-    // Add transactions to appropriate budget categories
     filteredTransactions.forEach(transaction => {
       const budgetCategory = categorizeToBudgetCategory(transaction);
       spending[budgetCategory] += Math.abs(transaction.amount);
@@ -143,7 +127,6 @@ const Budget = ({ transactions }) => {
 
     setCategorySpending(spending);
 
-    // Check for warnings
     const newWarnings = [];
     Object.entries(spending).forEach(([category, amount]) => {
       if (budgets[category] && amount > budgets[category].limit) {
@@ -170,34 +153,61 @@ const Budget = ({ transactions }) => {
     setWarnings(newWarnings);
   }, [transactions, month, year, budgets]);
 
-  // Handle month change
+  useEffect(() => {
+    if (!transactions || transactions.length === 0) {
+      setHasMultipleMonths(false);
+      setMonthsWithData([]);
+      return;
+    }
+
+    const uniqueMonthYears = new Set();
+    const monthsData = [];
+
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date);
+      const monthYear = `${date.getMonth()}-${date.getFullYear()}`;
+      
+      if (!uniqueMonthYears.has(monthYear)) {
+        uniqueMonthYears.add(monthYear);
+        monthsData.push({
+          month: date.getMonth(),
+          year: date.getFullYear(),
+          label: `${getMonthName(date.getMonth())} ${date.getFullYear()}`
+        });
+      }
+    });
+
+    monthsData.sort((a, b) => {
+      if (a.year !== b.year) return b.year - a.year;
+      return b.month - a.month;
+    });
+
+    setMonthsWithData(monthsData);
+    setHasMultipleMonths(uniqueMonthYears.size >= 2);
+  }, [transactions]);
+
   const handleMonthChange = (e) => {
     setMonth(parseInt(e.target.value));
   };
 
-  // Handle year change
   const handleYearChange = (e) => {
     setYear(parseInt(e.target.value));
   };
 
-  // Start editing budgets
   const handleEditClick = () => {
     setEditedBudgets(JSON.parse(JSON.stringify(budgets)));
     setIsEditing(true);
   };
 
-  // Save budget changes
   const handleSaveClick = () => {
     setBudgets(editedBudgets);
     setIsEditing(false);
   };
 
-  // Cancel budget editing
   const handleCancelClick = () => {
     setIsEditing(false);
   };
 
-  // Handle budget limit change
   const handleBudgetChange = (category, value) => {
     setEditedBudgets(prev => ({
       ...prev,
@@ -208,7 +218,6 @@ const Budget = ({ transactions }) => {
     }));
   };
 
-  // Generate chart data
   const generateChartData = () => {
     const labels = [];
     const data = [];
@@ -218,7 +227,7 @@ const Budget = ({ transactions }) => {
     Object.entries(budgets).forEach(([category, budget]) => {
       labels.push(category);
       data.push(budget.limit);
-      backgroundColor.push(budget.color + '99'); // Add transparency
+      backgroundColor.push(budget.color + '99');
       borderColor.push(budget.color);
     });
 
@@ -235,39 +244,82 @@ const Budget = ({ transactions }) => {
     };
   };
 
-  // Generate spending vs budget chart data
-  const generateSpendingVsBudgetData = () => {
-    const categories = [];
-    const budgetData = [];
-    const spendingData = [];
-    const backgroundColors = [];
+  const generateMonthlyReport = () => {
+    if (!hasMultipleMonths) return;
 
-    Object.entries(budgets).forEach(([category, budget]) => {
-      const spent = categorySpending[category] || 0;
+    const monthlyData = {};
+    
+    monthsWithData.forEach(monthData => {
+      const { month, year } = monthData;
+      const key = `${month}-${year}`;
       
-      categories.push(category);
-      budgetData.push(budget.limit);
-      spendingData.push(spent);
+      monthlyData[key] = {
+        label: `${getMonthName(month)} ${year}`,
+        totalSpending: 0,
+        categorySpending: {},
+        transactionCount: 0
+      };
       
-      // Color logic: green if under budget, yellow if close, red if over
-      if (spent > budget.limit) {
-        backgroundColors.push('#F44336');  // Red for over budget
-      } else if (spent > budget.limit * 0.8) {
-        backgroundColors.push('#FF9800');  // Orange for close to limit
-      } else {
-        backgroundColors.push('#4CAF50');  // Green for under budget
-      }
+      Object.keys(budgets).forEach(category => {
+        monthlyData[key].categorySpending[category] = 0;
+      });
     });
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date);
+      const key = `${date.getMonth()}-${date.getFullYear()}`;
+      
+      if (!monthlyData[key]) return;
+      
+      const amount = Math.abs(transaction.amount);
+      const budgetCategory = categorizeToBudgetCategory(transaction);
+      
+      monthlyData[key].totalSpending += amount;
+      monthlyData[key].categorySpending[budgetCategory] += amount;
+      monthlyData[key].transactionCount++;
+    });
+    
+    setMonthlyComparisonData(monthlyData);
+    setShowMonthlyReport(true);
+  };
+
+  const toggleMonthlyReport = () => {
+    if (!showMonthlyReport && hasMultipleMonths) {
+      generateMonthlyReport();
+    } else {
+      setShowMonthlyReport(!showMonthlyReport);
+    }
+  };
+
+  const getMonthlyComparisonChartData = () => {
+    if (!showMonthlyReport || Object.keys(monthlyComparisonData).length === 0) {
+      return null;
+    }
+
+    const monthKeys = Object.keys(monthlyComparisonData)
+      .sort((a, b) => {
+        const [aMonth, aYear] = a.split('-').map(Number);
+        const [bMonth, bYear] = b.split('-').map(Number);
+        
+        if (aYear !== bYear) return aYear - bYear;
+        return aMonth - bMonth;
+      })
+      .slice(-6);
 
     return {
-      categories,
-      budgetData,
-      spendingData,
-      backgroundColors
+      labels: monthKeys.map(key => monthlyComparisonData[key].label),
+      datasets: [
+        {
+          label: 'Total Spending',
+          data: monthKeys.map(key => monthlyComparisonData[key].totalSpending),
+          backgroundColor: '#6c63ff',
+          borderColor: '#5a52d5',
+          borderWidth: 1,
+        }
+      ]
     };
   };
 
-  // Get month name
   const getMonthName = (monthIndex) => {
     const months = [
       'January', 'February', 'March', 'April', 'May', 'June',
@@ -276,26 +328,16 @@ const Budget = ({ transactions }) => {
     return months[monthIndex];
   };
 
-  // Calculate total budget
   const totalBudget = Object.values(budgets).reduce((sum, budget) => sum + budget.limit, 0);
-  
-  // Calculate total spending
   const totalSpending = Object.values(categorySpending).reduce((sum, amount) => sum + amount, 0);
-  
-  // Calculate remaining budget
   const remainingBudget = totalBudget - totalSpending;
-  
-  // Calculate percentage of budget used
   const percentUsed = totalBudget > 0 ? (totalSpending / totalBudget) * 100 : 0;
-
-  // Generate years for dropdown (current year and 5 years back)
   const currentYear = new Date().getFullYear();
   const yearOptions = [];
   for (let i = 0; i < 6; i++) {
     yearOptions.push(currentYear - i);
   }
 
-  // If no transactions, show a message
   if (!transactions || transactions.length === 0) {
     return (
       <div className="card">
@@ -311,7 +353,6 @@ const Budget = ({ transactions }) => {
     <>
       <h1>Budget Tracker</h1>
       
-      {/* Time period selector */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 className="card-title">
@@ -340,15 +381,68 @@ const Budget = ({ transactions }) => {
             </select>
             
             {!isEditing ? (
-              <button onClick={handleEditClick} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FaEdit /> Edit Budgets
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                  onClick={handleEditClick} 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    backgroundColor: '#6c63ff',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '4px',
+                    fontWeight: '500'
+                  }}
+                >
+                  <FaEdit /> Edit Budgets
+                </button>
+                <button 
+                  onClick={toggleMonthlyReport} 
+                  disabled={!hasMultipleMonths}
+                  title={!hasMultipleMonths ? "Need data from at least 2 months" : "View monthly spending report"}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    opacity: hasMultipleMonths ? 1 : 0.6,
+                    cursor: hasMultipleMonths ? 'pointer' : 'not-allowed',
+                    backgroundColor: '#4caf50',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '4px',
+                    fontWeight: '500'
+                  }}
+                >
+                  <FaFileAlt /> {showMonthlyReport ? "Hide" : "Show"} Monthly Report
+                </button>
+              </div>
             ) : (
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={handleSaveClick} className="success-button" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button 
+                  onClick={handleSaveClick} 
+                  className="success-button" 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    fontWeight: '500'
+                  }}
+                >
                   <FaSave /> Save
                 </button>
-                <button onClick={handleCancelClick} className="danger-button" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button 
+                  onClick={handleCancelClick} 
+                  className="danger-button" 
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    fontWeight: '500'
+                  }}
+                >
                   <FaTimes /> Cancel
                 </button>
               </div>
@@ -357,7 +451,36 @@ const Budget = ({ transactions }) => {
         </div>
       </div>
       
-      {/* Budget summary cards */}
+      {showMonthlyReport && hasMultipleMonths && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h2 className="card-title">
+            <FaFileAlt className="card-icon" /> Monthly Spending Comparison Report
+          </h2>
+          
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ marginLeft: '1rem', marginBottom: '1rem', fontSize: '1.1rem' }}>Monthly Spending Trends</h3>
+            <div className="chart-container" style={{ height: '250px' }}>
+              {getMonthlyComparisonChartData() && (
+                <Bar 
+                  data={getMonthlyComparisonChartData()} 
+                  options={{ 
+                    maintainAspectRatio: false,
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          callback: (value) => `$${value}`
+                        }
+                      }
+                    }
+                  }} 
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="grid">
         <div className="summary-card">
           <FaCoins className="summary-card-icon" style={{ color: '#4caf50' }} />
@@ -382,7 +505,6 @@ const Budget = ({ transactions }) => {
         </div>
       </div>
       
-      {/* Warnings and alerts */}
       {warnings.length > 0 && (
         <div className="card" style={{ marginTop: '2rem', borderLeft: '4px solid #ff9800' }}>
           <h2 className="card-title">
@@ -434,7 +556,6 @@ const Budget = ({ transactions }) => {
         </div>
       )}
       
-      {/* Budget details table */}
       <div className="card" style={{ marginTop: '2rem' }}>
         <h2 className="card-title">Budget Details</h2>
         <div className="table-container" style={{ overflowX: 'auto' }}>
@@ -454,12 +575,11 @@ const Budget = ({ transactions }) => {
                 const remaining = budget.limit - spent;
                 const percentage = (spent / budget.limit) * 100;
                 
-                // Determine color based on spending level
-                let progressColor = '#4CAF50'; // Green by default
+                let progressColor = '#4CAF50';
                 if (percentage > 100) {
-                  progressColor = '#F44336'; // Red if over budget
+                  progressColor = '#F44336';
                 } else if (percentage > 80) {
-                  progressColor = '#FF9800'; // Orange if approaching limit
+                  progressColor = '#FF9800';
                 }
                 
                 return (
@@ -508,7 +628,6 @@ const Budget = ({ transactions }) => {
         </div>
       </div>
       
-      {/* Charts section */}
       <div className="grid" style={{ marginTop: '2rem' }}>
         <div className="card">
           <h2 className="card-title">Budget Allocation</h2>

@@ -1,52 +1,83 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  --background: white;
+  --foreground: #1e1e1e;
+  --card: white;
+  --card-foreground: #1e1e1e;
+  --popover: white;
+  --popover-foreground: #1e1e1e;
+  --primary: #6c63ff;
+  --primary-foreground: #f8f9fc;
+  --secondary: #4caf50;
+  --secondary-foreground: #f8f9fc;
+  --muted: #f3f4f6;
+  --muted-foreground: #6c757d;
+  --accent: #f3f4f6;
+  --accent-foreground: #1e1e1e;
+  --destructive: #f44336;
+  --destructive-foreground: #f8f9fc;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #6c63ff;
+  --radius: 0.75rem;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 252 56% 57%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 142 71% 45%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 252 56% 57%;
-    --radius: 0.75rem;
-  }
+  font-family: var(--font-family);
+  line-height: 1.5;
+  font-weight: 400;
+  
+  /* Enhanced text contrast */
+  color: rgba(255, 255, 255, 0.95);
+  background-color: #121212;
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 252 56% 57%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 142 71% 45%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 252 56% 57%;
-  }
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  --background: #1e1e1e;
+  --foreground: #f8f9fc;
+  --card: #1e1e1e;
+  --card-foreground: #f8f9fc;
+  --popover: #1e1e1e;
+  --popover-foreground: #f8f9fc;
+  --primary: #6c63ff;
+  --primary-foreground: #f8f9fc;
+  --secondary: #4caf50;
+  --secondary-foreground: #f8f9fc;
+  --muted: #2d2d2d;
+  --muted-foreground: #d4d4e8; /* Brighter for better readability */
+  --accent: #2d2d2d;
+  --accent-foreground: #f8f9fc;
+  --destructive: #f44336;
+  --destructive-foreground: #f8f9fc;
+  --border: #2d2d2d;
+  --input: #2d2d2d;
+  --ring: #6c63ff;
+}
+
+/* Increasing header text visibility */
+h1, h2, h3, h4, h5, h6 {
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* Better contrast for links */
+a {
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #8b85ff;
+}
+
+/* Enhanced paragraph readability */
+p {
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 1rem;
 }
 
 /* Budget Table Styles - Enhanced */
@@ -63,8 +94,8 @@
 .budget-table th {
   background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
   font-weight: 600;
-  font-family: var(--font-family);
-  color: #fff;
+  font-family: Arial, sans-serif;
+  color: #f8f9fc; /* Brighter white for better readability */
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 0.85rem;
@@ -82,9 +113,10 @@
 .budget-table td {
   padding: 1rem 1.2rem;
   text-align: left;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-family: var(--font-family);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Increased opacity for better visibility */
+  font-family: Arial, sans-serif;
   transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.9); /* Brighter text for better readability */
 }
 
 .budget-table tr:last-child td {
@@ -110,7 +142,7 @@
 }
 
 .budget-table tr:hover td {
-  color: hsl(var(--primary));
+  color: var(--primary);
 }
 
 /* Alert and Insight Items - Enhanced */
@@ -240,8 +272,8 @@
 }
 
 .period-selector select:focus {
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px hsla(var(--primary), 0.25);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.25);
   outline: none;
 }
 
@@ -254,7 +286,7 @@
   border-radius: 16px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background-color: var(--card-bg);
+  background-color: var(--card);
   border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
   position: relative;
@@ -267,7 +299,7 @@
   left: 0;
   right: 0;
   height: 5px;
-  background: linear-gradient(to right, hsl(var(--primary)), transparent);
+  background: linear-gradient(to right, var(--primary), transparent);
 }
 
 .budget-card:hover {
@@ -317,7 +349,7 @@
   z-index: 1000;
   overflow: hidden;
   animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-family: var(--font-family);
+  font-family: Arial, sans-serif;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -439,11 +471,11 @@
 .nudge-container-empty {
   padding: 2rem 1.5rem;
   text-align: center;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7); /* Brighter for better readability */
   font-style: italic;
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(255, 255, 255, 0.05); /* Slightly more visible background */
   border-radius: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border: 1px dashed rgba(255, 255, 255, 0.15); /* More visible border */
 }
 
 .nudge-header {
@@ -560,15 +592,16 @@
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
-  color: #ffffff;
-  font-family: var(--font-family);
+  color: #ffffff; /* Pure white for maximum contrast */
+  font-family: Arial, sans-serif;
   letter-spacing: -0.2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Stronger shadow for better readability */
 }
 
 .nudge-timestamp {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
-  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.85); /* Brighter for better readability */
+  background-color: rgba(255, 255, 255, 0.08); /* Slightly more visible background */
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
 }
@@ -576,9 +609,9 @@
 .nudge-content p {
   margin: 0.4rem 0 0;
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.95); /* Very bright for better readability */
   line-height: 1.6;
-  font-family: var(--font-family);
+  font-family: Arial, sans-serif;
   font-weight: 400;
 }
 
@@ -612,11 +645,123 @@
   padding: 0 2rem;
 }
 
-/* Light mode specifics */
+/* Monthly report styles */
+.monthly-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
+}
+
+.monthly-report-section {
+  margin-bottom: 2rem;
+}
+
+.monthly-report-section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.month-change-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid;
+  transition: all 0.2s ease;
+}
+
+.month-change-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.month-change-positive {
+  border-color: var(--destructive);
+}
+
+.month-change-negative {
+  border-color: var(--secondary);
+}
+
+.month-change-neutral {
+  border-color: var(--primary);
+}
+
+.month-change-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month-change-value {
+  font-size: 0.9rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.month-change-value.positive {
+  background-color: rgba(244, 67, 54, 0.2); /* More visible background */
+  color: #ff9e9e; /* Brighter red for better readability */
+}
+
+.month-change-value.negative {
+  background-color: rgba(76, 175, 80, 0.2); /* More visible background */
+  color: #aeebba; /* Brighter green for better readability */
+}
+
+.month-change-value.neutral {
+  background-color: rgba(255, 152, 0, 0.2); /* More visible background */
+  color: #ffd699; /* Brighter orange for better readability */
+}
+
+.month-change-categories {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.category-change-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2); /* More visible border */
+  color: rgba(255, 255, 255, 0.9); /* Brighter text for better readability */
+}
+
+.category-change-item:last-child {
+  border-bottom: none;
+}
+
+/* Light mode adjustments for high contrast */
 @media (prefers-color-scheme: light) {
+  :root {
+    color: rgba(0, 0, 0, 0.87);
+    background-color: #f9f9f9;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  p {
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  a:hover {
+    color: #5550e0;
+  }
+
   .budget-table th {
     background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
     color: #333;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
   
   .budget-table td {
@@ -663,6 +808,7 @@
   
   .nudge-content h4 {
     color: #333;
+    text-shadow: none;
   }
   
   .nudge-content p {
@@ -687,5 +833,37 @@
   .nudge-dismiss:hover {
     color: rgba(0, 0, 0, 0.8);
     background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .month-change-card {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  .category-change-item {
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+  }
+  
+  .month-change-value.positive {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #d32f2f; /* Darker red for light mode */
+  }
+  
+  .month-change-value.negative {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #2e7d32; /* Darker green for light mode */
+  }
+  
+  .month-change-value.neutral {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #e65100; /* Darker orange for light mode */
+  }
+  
+  .nudge-content h4 {
+    color: #333;
+    text-shadow: none;
+  }
+  
+  .nudge-content p {
+    color: #555;
   }
 }
